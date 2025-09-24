@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Namma Traffic AI - Smart Traffic Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.4/socket.io.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="logo-section">
+                <i class="fas fa-traffic-light"></i>
+                <h1>Namma Traffic AI</h1>
+                <span class="subtitle">Smart Traffic Management for Bangalore</span>
+            </div>
+            <div class="status-section">
+                <div class="connection-status" id="connection-status">
+                    <i class="fas fa-circle"></i>
+                    <span>Connected</span>
+                </div>
+                <div class="system-time" id="system-time"></div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="dashboard-main">
+            <!-- System Overview -->
+            <section class="overview-panel">
+                <h2><i class="fas fa-tachometer-alt"></i> System Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-card commute-reduction">
+                        <div class="stat-value" id="commute-reduction">0%</div>
+                        <div class="stat-label">Commute Time Reduction</div>
+                        <div class="stat-target">Target: 10%</div>
+                    </div>
+                    <div class="stat-card efficiency">
+                        <div class="stat-value" id="system-efficiency">0%</div>
+                        <div class="stat-label">System Efficiency</div>
+                    </div>
+                    <div class="stat-card wait-time">
+                        <div class="stat-value" id="avg-wait-time">0s</div>
+                        <div class="stat-label">Avg Wait Time</div>
+                    </div>
+                    <div class="stat-card vehicles">
+                        <div class="stat-value" id="total-vehicles">0</div>
+                        <div class="stat-label">Vehicles Processed</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Traffic Points Map -->
+            <section class="map-panel">
+                <h2><i class="fas fa-map-marked-alt"></i> Traffic Points - Bangalore</h2>
+                <div class="traffic-points-grid" id="traffic-points-grid">
+                    {% for point_id, point_data in traffic_points.items() %}
+                    <div class="traffic-point-card" data-point-id="{{ point_id }}">
+                        <div class="point-header">
+                            <h3>{{ point_data.name }}</h3>
+                            <div class="priority-badge priority-{{ point_data.priority }}">
+                                {{ point_data.priority|upper }}
+                            </div>
+                        </div>
+                        
+                        <div class="traffic-light-container">
+                            <div class="traffic-light">
+                                <div class="light red" id="red-{{ point_id }}"></div>
+                                <div class="light yellow" id="yellow-{{ point_id }}"></div>
+                                <div class="light green active" id="green-{{ point_id }}"></div>
+                            </div>
+                            <div class="signal-timer" id="timer-{{ point_id }}">45s</div>
+                        </div>
+                        
+                        <div class="traffic-metrics">
+                            <div class="metric">
+                                <span class="metric-label">Vehicles:</span>
+                                <span class="metric-value" id="vehicles-{{ point_id }}">--</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Speed:</span>
+                                <span class="metric-value" id="speed-{{ point_id }}">-- km/h</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Congestion:</span>
+                                <span class="metric-value" id="congestion-{{ point_id }}">--%</span>
+                            </div>
+                            <div class="congestion-bar">
+                                <div class="congestion-fill" id="congestion-bar-{{ point_id }}" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-buttons">
+                            <button class="control-btn auto active" onclick="toggleMode('{{ point_id }}')">
+                                <i class="fas fa-robot"></i> AI Mode
+                            </button>
+                            <button class="control-btn manual" onclick="toggleMode('{{ point_id }}')">
+                                <i class="fas fa-hand-paper"></i> Manual
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Analytics Panel -->
+            <section class="analytics-panel">
+                <h2><i class="fas fa-chart-line"></i> Real-time Analytics</h2>
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Traffic Flow Trends</h3>
+                        <div id="traffic-flow-chart" class="chart"></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>System Performance</h3>
+                        <div id="performance-chart" class="chart"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Control Panel -->
+            <section class="control-panel">
+                <h2><i class="fas fa-sliders-h"></i> Traffic Authority Control</h2>
+                <div class="control-grid">
+                    <div class="control-section">
+                        <h3>Emergency Controls</h3>
+                        <button class="emergency-btn" onclick="emergencyMode()">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Emergency Mode
+                        </button>
+                        <button class="reset-btn" onclick="resetSystem()">
+                            <i class="fas fa-sync-alt"></i>
+                            Reset All Signals
+                        </button>
+                    </div>
+                    
+                    <div class="control-section">
+                        <h3>AI Settings</h3>
+                        <div class="setting-row">
+                            <label for="ai-aggressiveness">AI Aggressiveness:</label>
+                            <select id="ai-aggressiveness" onchange="updateAISettings()">
+                                <option value="conservative">Conservative</option>
+                                <option value="moderate" selected>Moderate</option>
+                                <option value="aggressive">Aggressive</option>
+                            </select>
+                        </div>
+                        <div class="setting-row">
+                            <label for="update-frequency">Update Frequency:</label>
+                            <select id="update-frequency" onchange="updateAISettings()">
+                                <option value="30">30 seconds</option>
+                                <option value="60" selected>1 minute</option>
+                                <option value="120">2 minutes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Alerts Panel -->
+        <aside class="alerts-panel" id="alerts-panel">
+            <h3><i class="fas fa-bell"></i> System Alerts</h3>
+            <div class="alerts-list" id="alerts-list">
+                <div class="alert-item info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>System initialized successfully</span>
+                    <small id="init-time"></small>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script>
+        // Initialize dashboard with server data
+        const trafficPoints = {{ traffic_points|tojsonhtml }};
+        const bangaloreCoords = {{ bangalore_coords|tojsonhtml }};
+        
+        // Start the dashboard
+        initializeDashboard();
+    </script>
+</body>
+</html>
