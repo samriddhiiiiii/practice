@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+    # For production-style serving with WebSockets, uncomment below and comment the python line:
+    # command: gunicorn -k eventlet -w 1 -b 0.0.0.0:5000 app:app
+    command: python app.py
