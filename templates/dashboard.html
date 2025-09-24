@@ -177,8 +177,8 @@
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
     <script>
         // Initialize dashboard with server data
-        const trafficPoints = {{ traffic_points|tojsonhtml }};
-        const bangaloreCoords = {{ bangalore_coords|tojsonhtml }};
+        const trafficPoints = {{ traffic_points|tojson }};
+        const bangaloreCoords = {{ bangalore_coords|tojson }};
         
         // Start the dashboard
         initializeDashboard();

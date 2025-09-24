@@ -71,12 +71,13 @@ class TrafficSimulator:
         )
         
         # Calculate congestion level
-        max_capacity = base_vehicles_per_minute * 3  # Peak capacity
-        congestion_level = min(100, (vehicle_count / max_capacity) * 100)
+        max_capacity = base_vehicles_per_minute * 4  # Peak capacity (increased to be more realistic)
+        raw_congestion = (vehicle_count / max_capacity) * 100
+        congestion_level = min(95, raw_congestion)  # Cap at 95% to be realistic
         
-        # Apply congestion penalty (exponential increase)
-        if congestion_level > 70:
-            congestion_level = 70 + (congestion_level - 70) * 1.5
+        # Apply congestion penalty (exponential increase) only for very high congestion
+        if congestion_level > 80:
+            congestion_level = 80 + (congestion_level - 80) * 0.5
         
         # Calculate average speed based on congestion
         average_speed = self._calculate_speed_from_congestion(congestion_level)
@@ -219,17 +220,17 @@ class TrafficSimulator:
         
         # Gradual improvement over time (learning effect)
         max_improvement = Config.TARGET_COMMUTE_REDUCTION
-        learning_rate = 0.1  # 10% of max improvement per hour
+        learning_rate = 0.3  # 30% of max improvement per hour (faster learning)
         
         # Calculate improvement based on system runtime
         improvement_factor = 1 - math.exp(-learning_rate * hours_running)
         current_reduction = max_improvement * improvement_factor
         
-        # Add some realistic variation
-        current_reduction *= random.uniform(0.8, 1.2)
+        # Add some realistic variation but keep it positive
+        current_reduction *= random.uniform(0.9, 1.1)
         
         # Cap at target reduction
-        return min(max_improvement, max(0, current_reduction))
+        return min(max_improvement, max(0.02, current_reduction))  # Minimum 2% to show progress
     
     def calculate_system_efficiency(self):
         """Calculate overall system efficiency percentage"""
