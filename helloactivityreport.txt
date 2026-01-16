@@ -9,3 +9,8 @@ weight training
 favourite foods:
 chole bhature
 dal makhni
+
+favourite subjects:
+physics
+english
+source code management
