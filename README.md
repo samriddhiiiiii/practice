@@ -2,6 +2,33 @@
 
 An AI-based traffic management system designed specifically for Bangalore to optimize signal timings and reduce urban congestion by 10%.
 
+## 🚀 Quick Start - Three Ways to Run!
+
+We now have **three different applications** you can run:
+
+### 1. 📱 CLI App (No Dependencies!)
+```bash
+python traffic_cli_app.py
+```
+Beautiful terminal-based dashboard with live traffic monitoring.
+
+### 2. 🌐 Simple Web App (No Dependencies!)
+```bash
+python simple_web_app.py
+```
+Then open http://localhost:8000 in your browser for a stunning web dashboard!
+
+![Web App Screenshot](https://github.com/user-attachments/assets/568e2a7a-114d-4583-a270-c92a58b66335)
+
+### 3. 🎯 Full Flask App (Advanced Features)
+```bash
+pip install -r requirements.txt
+python app.py
+```
+Then open http://localhost:5000 for the full-featured application.
+
+📖 **See [QUICKSTART.md](QUICKSTART.md) for detailed instructions!**
+
 ## Features
 
 - **Real-time Traffic Analysis**: Computer vision-based traffic monitoring using OpenCV
